@@ -1,0 +1,4 @@
+int testF(int x)
+{
+    return x = 0;
+}
