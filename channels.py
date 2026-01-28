@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections import defaultdict
 
 send = {}
 recv = {}
@@ -23,10 +24,38 @@ def bindChannels():
                 end = content.index("]", start)
                 recv[f] = int(content[start:end])
 
+def removeChannelHeaders():
+    for f in Path(".").glob("CH_*.h"):
+        f.unlink()
 
-listFiles()
-bindChannels()
-print("SEND FILES:")
-print(send)
-print("RECV FILES:")
-print(recv)
+def generateChannelHeaders():
+    channels = defaultdict(lambda: {"send": [], "recv": []})
+
+    for file, ch in send.items():
+        channels[ch]["send"].append(file)
+
+    for file, ch in recv.items():
+        channels[ch]["recv"].append(file)
+
+    for ch, data in channels.items():
+        header = Path(f"CH_{ch}.h")
+        with open(header, "w") as h:
+            h.write(f"#ifndef CH_{ch}_H\n")
+            h.write(f"#define CH_{ch}_H\n\n")
+
+            h.write(f"#endif // CH_{ch}_H\n\n")
+
+
+
+def main():
+    listFiles()
+    bindChannels()
+    print("SEND FILES:")
+    print(send)
+    print("RECV FILES:")
+    print(recv)
+    removeChannelHeaders()
+    generateChannelHeaders()
+
+
+main()
